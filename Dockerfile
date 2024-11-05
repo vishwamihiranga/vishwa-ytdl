@@ -1,24 +1,21 @@
+# Use the official Node.js image as the base image
 FROM node:lts-buster
 
-# Update package lists and install required packages
-RUN apt-get update && \
-  apt-get install -y \
-  ffmpeg \
-  imagemagick \
-  webp && \
-  apt-get upgrade -y
+# Set the working directory in the container
+WORKDIR /usr/src/app
 
-# Copy package.json and install dependencies
+# Copy package.json and package-lock.json (if it exists)
 COPY package.json ./
+COPY package-lock.json ./
 
-# Install npm dependencies
-RUN npm install && npm install -g qrcode-terminal pm2
+# Install the dependencies
+RUN npm install
 
-# Copy the rest of your application code
+# Copy the rest of the application code
 COPY . .
 
-# Expose the port your application runs on
+# Expose the port your application will run on
 EXPOSE 3000
 
-# Start the application using pm2-runtime
-CMD ["pm2-runtime", "start", "index.js"]
+# Command to run the application
+CMD ["node", "index.js"]
