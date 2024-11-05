@@ -1,20 +1,32 @@
-# Use the official Node.js image as the base image
+# Use Node.js LTS version (Debian-based)
 FROM node:lts-buster
 
-# Set the working directory in the container
+# Set environment variables
+ENV NODE_ENV=production
+
+# Update the package repository and install dependencies
+RUN apt-get update && \
+  apt-get install -y \
+  ffmpeg \
+  imagemagick \
+  webp && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
+
+# Set the working directory inside the container
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json (if it exists)
+# Copy package.json first to leverage Docker caching
 COPY package.json ./
 
-# Install the dependencies
-RUN npm install
+# Install Node.js dependencies
+RUN npm install --production
 
-# Copy the rest of the application code
+# Copy all other files to the working directory
 COPY . .
 
-# Expose the port your application will run on
+# Expose the port on which the app will run
 EXPOSE 3000
 
-# Command to run the application
+# Start the app directly using Node.js
 CMD ["node", "index.js"]
